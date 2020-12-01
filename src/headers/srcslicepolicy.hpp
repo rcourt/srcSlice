@@ -43,6 +43,8 @@ public:
 
     void PrintProfile() {
         std::cout << "==========================================================================" << std::endl;
+        std::cout << "File: " << file << std::endl;
+        std::cout << "Function: " << function << std::endl;
         std::cout << "Name and type: " << variableName << " " << variableType << std::endl;
         std::cout << "Contains Declaration: " << containsDeclaration << " " << "Containing class: "
                   << nameOfContainingClass << std::endl;
@@ -143,6 +145,8 @@ public:
                                                  (decldata.isPointer || decldata.isReference), true,
                                                  std::set<unsigned int>{decldata.lineNumber});
                 sliceProfile.nameOfContainingClass = ctx.currentClassName;
+                sliceProfile.function = ctx.currentFunctionName;
+                sliceProfile.file = ctx.currentFilePath;
                 sliceProfileItr->second.push_back(sliceProfile);
                 sliceProfileItr->second.back().containsDeclaration = true;
             } else {
@@ -150,6 +154,8 @@ public:
                                               (decldata.isPointer || decldata.isReference), false,
                                               std::set<unsigned int>{decldata.lineNumber});
                 sliceProf.nameOfContainingClass = ctx.currentClassName;
+                sliceProf.function = ctx.currentFunctionName;
+                sliceProf.file = ctx.currentFilePath;
                 sliceProf.containsDeclaration = true;
                 profileMap->insert(std::make_pair(decldata.nameOfIdentifier,
                                                   std::vector<SliceProfile>{
@@ -171,6 +177,8 @@ public:
                     auto sliceProf = SliceProfile(dvar, decldata.lineNumber, false, false, std::set<unsigned int>{},
                                                   std::set<unsigned int>{decldata.lineNumber});
                     sliceProf.nameOfContainingClass = ctx.currentClassName;
+                    sliceProf.function = ctx.currentFunctionName;
+                    sliceProf.file = ctx.currentFilePath;
                     auto newSliceProfileFromDeclDvars = profileMap->insert(std::make_pair(dvar,
                                                                                           std::vector<SliceProfile>{
                                                                                                   std::move(sliceProf)
@@ -194,6 +202,8 @@ public:
                 //Just update definitions and uses if name already exists. Otherwise, add new name.
                 if (sliceProfileExprItr != profileMap->end()) {
                     sliceProfileExprItr->second.back().nameOfContainingClass = ctx.currentClassName;
+                    sliceProfileExprItr->second.back().function = ctx.currentFunctionName;
+                    sliceProfileExprItr->second.back().file = ctx.currentFilePath;
                     sliceProfileExprItr->second.back().uses.insert(exprdata.second.uses.begin(),
                                                                    exprdata.second.uses.end());
                     sliceProfileExprItr->second.back().definitions.insert(exprdata.second.definitions.begin(),
@@ -222,6 +232,8 @@ public:
                                                                                                   exprdata.second.uses)
                                                                                   }));
                     sliceProfileExprItr2.first->second.back().nameOfContainingClass = ctx.currentClassName;
+                    sliceProfileExprItr2.first->second.back().function = ctx.currentFunctionName;
+                    sliceProfileExprItr2.first->second.back().file = ctx.currentFilePath;
 
                     if (!StringContainsCharacters(exprDataSet.lhsName)) continue;
                     if (sliceProfileLHSItr != profileMap->end() && sliceProfileLHSItr->second.back().potentialAlias) {
@@ -252,6 +264,8 @@ public:
                     auto sliceProf = SliceProfile(initdata.second.nameOfIdentifier, ctx.currentLineNumber, false, false,
                                                   std::set<unsigned int>{}, initdata.second.uses);
                     sliceProf.nameOfContainingClass = ctx.currentClassName;
+                    sliceProf.function = ctx.currentFunctionName;
+                    sliceProf.file = ctx.currentFilePath;
                     profileMap->insert(std::make_pair(initdata.second.nameOfIdentifier,
                                                       std::vector<SliceProfile>{sliceProf}));
                 }
@@ -303,6 +317,8 @@ public:
                                                       std::vector<std::pair<std::string, std::string>>{
                                                               std::make_pair(callOrder, argumentOrder)});
                         sliceProf.nameOfContainingClass = ctx.currentClassName;
+                        sliceProf.function = ctx.currentFunctionName;
+                        sliceProf.file = ctx.currentFilePath;
                         profileMap->insert(std::make_pair(currentCallToken,
                                                           std::vector<SliceProfile>{sliceProf}));
                     }
@@ -320,6 +336,8 @@ public:
                                               std::set<unsigned int>{paramdata.lineNumber});
                 sliceProf.containsDeclaration = true;
                 sliceProf.nameOfContainingClass = ctx.currentClassName;
+                sliceProf.function = ctx.currentFunctionName;
+                sliceProf.file = ctx.currentFilePath;
                 sliceProfileItr->second.push_back(std::move(sliceProf));
             } else {
                 auto sliceProf = SliceProfile(paramdata.nameOfIdentifier, paramdata.lineNumber,
@@ -327,6 +345,8 @@ public:
                                               std::set<unsigned int>{paramdata.lineNumber});
                 sliceProf.containsDeclaration = true;
                 sliceProf.nameOfContainingClass = ctx.currentClassName;
+                sliceProf.function = ctx.currentFunctionName;
+                sliceProf.file = ctx.currentFilePath;
                 profileMap->insert(std::make_pair(paramdata.nameOfIdentifier,
                                                   std::vector<SliceProfile>{std::move(sliceProf)}));
             }
